@@ -13,5 +13,23 @@ export default {
   // Resolved here so the plugin is found even though it is a dependency of this package,
   // not of the slide repository.
   plugins: [require.resolve('prettier-plugin-slidev')],
-  overrides: [{ files: '*.md', options: { parser: 'slidev' } }],
+  // Only slide decks use the Slidev parser. Task texts (body.md, hint.md, ...), READMEs and docs are
+  // plain Markdown: the Slidev parser would read their `---` and lists as slide separators and
+  // frontmatter.
+  // prettier-plugin-slidev claims every .md file by default, so all Markdown is set back to the
+  // markdown parser first; later overrides win.
+  overrides: [
+    { files: '*.md', options: { parser: 'markdown' } },
+    {
+      files: [
+        'slides.md',
+        '00-index.md',
+        'sources.md',
+        'lessons/*/*.md',
+        'lessons/*/slides/**/*.md',
+        'pages/**/*.md',
+      ],
+      options: { parser: 'slidev' },
+    },
+  ],
 };

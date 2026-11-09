@@ -1,6 +1,6 @@
 {
   "name": "@workshops.de/slidev-toolkit",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Shared build, dev and deploy tooling for workshops.de Slidev slide repositories",
   "type": "module",
   "license": "MIT",
