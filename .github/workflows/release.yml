@@ -1,5 +1,9 @@
 # Publishes the package to npm when a version tag (v1.2.3) is pushed and moves the major tag
 # (v1) that slide repositories reference for the reusable deploy workflow.
+#
+# Uses npm trusted publishing (OIDC): no NPM_TOKEN secret. On npmjs.com the package
+# @workshops.de/slidev-toolkit needs a trusted publisher with organization "workshops-de",
+# repository "slidev-toolkit" and workflow "release.yml". Provenance is added automatically.
 name: Release
 
 on:
@@ -25,9 +29,7 @@ jobs:
         run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
 
       - name: Publish to npm
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
 
       - name: Move major version tag
         run: |

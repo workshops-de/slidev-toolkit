@@ -78,7 +78,8 @@ Then set **Settings → Pages → Source → GitHub Actions** once per repositor
 ## Releasing
 
 1. Bump `version` in `package.json` and commit.
-2. Push a tag `vX.Y.Z`. The release workflow publishes to npm (secret `NPM_TOKEN`) and moves the
+2. Push a tag `vX.Y.Z`. The release workflow publishes to npm via trusted publishing (OIDC, no
+   token; configured on npmjs.com for `workshops-de/slidev-toolkit` and `release.yml`) and moves the
    major tag (`v1`) that slide repositories use for the reusable workflow.
 3. Dependabot in the slide repositories picks up the new version.
 
