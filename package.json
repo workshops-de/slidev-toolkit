@@ -1,0 +1,27 @@
+{
+  "name": "@workshops.de/slidev-toolkit",
+  "version": "1.0.0",
+  "description": "Shared build, dev and deploy tooling for workshops.de Slidev slide repositories",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/workshops-de/slidev-toolkit.git"
+  },
+  "bin": {
+    "workshop-slides": "bin/workshop-slides.mjs"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "dependencies": {
+    "@slidev/cli": "^53.1.0",
+    "playwright-chromium": "^1.65.0",
+    "typescript": "^6.0.3",
+    "vue": "^3.5.45"
+  }
+}

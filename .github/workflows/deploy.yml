@@ -1,0 +1,73 @@
+# Reusable deploy workflow for workshops.de Slidev repositories.
+#
+# Usage in a slide repository (.github/workflows/deploy.yml):
+#
+#   name: Deploy pages
+#   on:
+#     workflow_dispatch:
+#     push:
+#       branches: [main]
+#   permissions:
+#     contents: read
+#     pages: write
+#     id-token: write
+#   concurrency:
+#     group: pages
+#     cancel-in-progress: false
+#   jobs:
+#     deploy:
+#       uses: workshops-de/slidev-toolkit/.github/workflows/deploy.yml@v1
+#
+# Requires Settings → Pages → Source: GitHub Actions in the calling repository.
+name: Deploy pages (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      pdf:
+        description: Export a PDF per deck
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for PDF export
+        if: inputs.pdf
+        run: npx workshop-slides install-browser
+
+      - name: Build slides
+        run: npx workshop-slides build --base /${{ github.event.repository.name }} ${{ !inputs.pdf && '--no-pdf' || '' }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
