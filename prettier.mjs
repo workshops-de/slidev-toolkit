@@ -10,6 +10,10 @@ export default {
   tabWidth: 2,
   trailingComma: 'es5',
   printWidth: 100,
+  // Never reformat code inside Markdown code blocks: that shifts the line numbers Slidev's line
+  // highlighting ({1|3-5}) refers to and breaks syntax Prettier doesn't know (e.g. Angular's
+  // @for/@if inside ```html blocks).
+  embeddedLanguageFormatting: 'off',
   // Resolved here so the plugin is found even though it is a dependency of this package,
   // not of the slide repository.
   plugins: [require.resolve('prettier-plugin-slidev')],
