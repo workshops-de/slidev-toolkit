@@ -1,44 +1,64 @@
-# Publishes the package to npm when a version tag (v1.2.3) is pushed and moves the major tag
-# (v1) that slide repositories reference for the reusable deploy workflow.
+# Releases the package when the version in package.json changes on main:
+#   1. publishes it to npm, unless that version is already there
+#   2. creates the tag vX.Y.Z and moves the major tag (v1) that slide repositories reference
+#      for the reusable deploy workflow
 #
 # Uses npm trusted publishing (OIDC): no NPM_TOKEN secret. On npmjs.com the package
-# @workshops.de/slidev-toolkit needs a trusted publisher with organization "workshops-de",
+# @workshops.de/slidev-toolkit has a trusted publisher with organization "workshops-de",
 # repository "slidev-toolkit" and workflow "release.yml". Provenance is added automatically.
 name: Release
 
 on:
+  workflow_dispatch:
   push:
-    tags: ['v*.*.*']
+    branches: [main]
+    paths: [package.json]
 
 permissions:
   contents: write
   id-token: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Check tag matches package.json version
-        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: Read package version
+        id: version
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major=v${VERSION%%.*}" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
         run: |
-          NAME_VERSION="$(node -p "const p=require('./package.json'); p.name + '@' + p.version")"
+          NAME_VERSION="$(node -p "require('./package.json').name")@${{ steps.version.outputs.version }}"
           if npm view "$NAME_VERSION" version >/dev/null 2>&1; then
             echo "$NAME_VERSION is already on npm, skipping publish"
           else
             npm publish --access public
           fi
 
-      - name: Move major version tag
+      - name: Tag release
         run: |
-          MAJOR="${GITHUB_REF_NAME%%.*}"
-          git tag -f "$MAJOR"
-          git push -f origin "$MAJOR"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git rev-parse -q --verify "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null; then
+            git tag "${{ steps.version.outputs.tag }}"
+            git push origin "${{ steps.version.outputs.tag }}"
+          fi
+          git tag -f "${{ steps.version.outputs.major }}"
+          git push -f origin "${{ steps.version.outputs.major }}"
