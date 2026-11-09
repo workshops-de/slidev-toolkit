@@ -15,7 +15,10 @@ reaches every repository with one version bump.
   - `workshop-slides install-browser`: installs the Chromium version that matches the bundled
     Playwright (npm 11 does not run Playwright's own install script).
 - **Pinned core dependencies:** `@slidev/cli`, `playwright-chromium`, `typescript` (6, required by
-  Slidev's Twoslash setup) and `vue`.
+  Slidev's Twoslash setup), `vue` and the addons `slidev-addon-tldraw` and
+  `slidev-addon-window-mockup` (decks still list the addons they use in their headmatter).
+- **Shared Prettier config** with `prettier` and `prettier-plugin-slidev`: set
+  `"prettier": "@workshops.de/slidev-toolkit/prettier"` in `package.json` instead of a `.prettierrc`.
 - **Reusable deploy workflow:** `.github/workflows/deploy.yml`, called from each slide repository.
 
 Two repository layouts are detected automatically:
@@ -27,7 +30,7 @@ Two repository layouts are detected automatically:
 
 ## Using it in a slide repository
 
-`package.json`: only the toolkit, the theme and the addons the decks use:
+`package.json`: only the toolkit and the theme:
 
 ```json
 {
@@ -36,13 +39,12 @@ Two repository layouts are detected automatically:
     "build": "workshop-slides build",
     "export": "slidev export"
   },
+  "prettier": "@workshops.de/slidev-toolkit/prettier",
   "dependencies": {
-    "@workshops.de/slidev-theme": "2.1.0",
-    "slidev-addon-tldraw": "^0.5.1",
-    "slidev-addon-window-mockup": "0.3.1"
+    "@workshops.de/slidev-theme": "2.1.0"
   },
   "devDependencies": {
-    "@workshops.de/slidev-toolkit": "^1.0.0"
+    "@workshops.de/slidev-toolkit": "^1.1.0"
   }
 }
 ```
